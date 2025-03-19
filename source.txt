@@ -1,0 +1,139 @@
+import React, { useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Upload } from "lucide-react";
+
+const diseaseDatabase = {
+  eczema: {
+    disease: "Eczema",
+    reason: "Dry and itchy skin with red patches due to inflammation and allergens.",
+    medicine: "Hydrocortisone cream"
+  },
+  psoriasis: {
+    disease: "Psoriasis",
+    reason: "Scaly, red patches on the skin caused by an overactive immune system.",
+    medicine: "Salicylic acid ointment"
+  },
+  acne: {
+    disease: "Acne",
+    reason: "Pimples, blackheads, and oily skin due to clogged pores and bacterial infection.",
+    medicine: "Benzoyl peroxide gel"
+  },
+  dermatitis: {
+    disease: "Dermatitis",
+    reason: "Skin irritation, redness, and itching due to allergic reactions or irritants.",
+    medicine: "Corticosteroid cream"
+  },
+  fungal_infection: {
+    disease: "Fungal Infection",
+    reason: "Itchy, red, and scaly skin caused by fungal overgrowth in warm, moist areas.",
+    medicine: "Clotrimazole antifungal cream"
+  },
+  rosacea: {
+    disease: "Rosacea",
+    reason: "Persistent facial redness and visible blood vessels caused by immune response and environmental triggers.",
+    medicine: "Metronidazole gel"
+  },
+  vitiligo: {
+    disease: "Vitiligo",
+    reason: "Loss of skin pigmentation due to destruction of melanocytes.",
+    medicine: "Topical corticosteroids or Tacrolimus ointment"
+  },
+  ringworm: {
+    disease: "Ringworm",
+    reason: "Circular, red, itchy rashes caused by fungal infection.",
+    medicine: "Terbinafine cream"
+  }
+};
+
+const SkinDiseaseDetector = () => {
+  const [image, setImage] = useState(null);
+  const [result, setResult] = useState(null);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [loginData, setLoginData] = useState({ email: "", phone: "", password: "" });
+  const [error, setError] = useState("");
+
+  const handleImageUpload = (event) => {
+    const file = event.target.files[0];
+    if (file) {
+      setImage(URL.createObjectURL(file));
+    }
+  };
+
+  const handleDetectDisease = async () => {
+    const detectedDisease = "eczema";
+    setResult(diseaseDatabase[detectedDisease]);
+  };
+
+  const isAlphanumeric = (password) => {
+    return /[a-zA-Z]/.test(password) && /[0-9]/.test(password);
+  };
+
+  const handleLogin = () => {
+    if (!loginData.email && !loginData.phone) {
+      setError("Please enter either an email or phone number.");
+      return;
+    }
+    if (!loginData.password) {
+      setError("Please enter a password.");
+      return;
+    }
+    if (!isAlphanumeric(loginData.password)) {
+      setError("Password must be alphanumeric (letters and numbers). Please try again.");
+      setLoginData({ ...loginData, password: "" });
+      return;
+    }
+    setError("");
+    setLoggedIn(true);
+  };
+
+  return (
+    <div className="flex flex-col items-center p-6 space-y-6">
+      {!loggedIn ? (
+        <Card className="w-full max-w-md p-4 space-y-4">
+          <CardContent className="flex flex-col space-y-4">
+            <h1 className="text-xl font-bold text-center">Login</h1>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
+            <Label>Email</Label>
+            <Input type="email" placeholder="Enter your email" value={loginData.email} onChange={(e) => setLoginData({ ...loginData, email: e.target.value })} />
+            <Label>Phone</Label>
+            <Input type="tel" placeholder="Enter your phone number" value={loginData.phone} onChange={(e) => setLoginData({ ...loginData, phone: e.target.value })} />
+            <Label>Password</Label>
+            <Input type="password" placeholder="Enter your password" value={loginData.password} onChange={(e) => setLoginData({ ...loginData, password: e.target.value })} />
+            <Button onClick={handleLogin}>Login</Button>
+          </CardContent>
+        </Card>
+      ) : (
+        <>
+          <h1 className="text-xl font-bold">Skin Disease Detection</h1>
+          <Card className="w-full max-w-md p-4 space-y-4">
+            <CardContent className="flex flex-col items-center space-y-4">
+              <Label className="font-semibold">Upload Skin Image</Label>
+              <Input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" id="fileInput" />
+              <label htmlFor="fileInput" className="cursor-pointer flex items-center space-x-2 px-4 py-2 border rounded-md" onClick={() => document.getElementById("fileInput").click()}>
+                <Upload className="w-5 h-5" />
+                <span>Choose File</span>
+              </label>
+              {image && <img src={image} alt="Uploaded Preview" className="w-40 h-40 object-cover rounded-md" />}
+              <Button onClick={handleDetectDisease} disabled={!image}>Detect Disease</Button>
+            </CardContent>
+          </Card>
+          {result && (
+            <Card className="w-full max-w-md p-4">
+              <CardContent>
+                <h2 className="font-semibold">Detection Result:</h2>
+                <p><strong>Disease:</strong> {result.disease}</p>
+                <p><strong>Reason:</strong> {result.reason}</p>
+                <p><strong>Recommended Medicine:</strong> {result.medicine}</p>
+              </CardContent>
+            </Card>
+          )}
+        </>
+      )}
+    </div>
+  );
+};
+
+export default SkinDiseaseDetector;
